@@ -15,12 +15,12 @@
       _ = require('underscore');
       Base64 = require('./lib/base64.js');
   }else{
-      _ = window._;
-      Base64 = window.Base64;
+      _ = this._;
+      Base64 = this.Base64;
   }
   //prefer native XMLHttpRequest always
-  if (typeof window !== 'undefined' && typeof window.XMLHttpRequest !== 'undefined'){
-      XMLHttpRequest = window.XMLHttpRequest;
+  if (typeof this !== 'undefined' && typeof this.XMLHttpRequest !== 'undefined'){
+      XMLHttpRequest = this.XMLHttpRequest;
   }
 
 
@@ -358,7 +358,7 @@
             "encoding": "utf-8"
           };
         } else {
-          	content = {
+              content = {
               "content": btoa(String.fromCharCode.apply(null, new Uint8Array(content))),
               "encoding": "base64"
             };
@@ -374,16 +374,19 @@
       // -------
 
       this.updateTree = function(baseTree, path, blob, cb) {
+        if (path instanceof Array) {
+            cb = blob;
+            blob = undefined;
+        }
         var data = {
           "base_tree": baseTree,
           "tree": [
-            {
+          ].concat(path instanceof Array?path:{
               "path": path,
               "mode": "100644",
               "type": "blob",
               "sha": blob
-            }
-          ]
+          }),
         };
         _request("POST", repoPath + "/git/trees", data, function(err, res) {
           if (err) return cb(err);
@@ -413,8 +416,7 @@
             "name": options.username
           },
           "parents": [
-            parent
-          ],
+          ].concat(parent),
           "tree": tree
         };
 
@@ -596,14 +598,23 @@
       this.write = function(branch, path, content, message, cb) {
         updateTree(branch, function(err, latestCommit) {
           if (err) return cb(err);
-          that.postBlob(content, function(err, blob) {
+          if (path instanceof Array) {
+            cb = message;
+            message = content;
+            content = undefined;
+          } else {
+            path = [{
+              path    : path,
+              mode    : "100644",
+              type    : "blob",
+              content    : content,
+            }];
+          }
+          that.updateTree(latestCommit, path, function(err, tree) {
             if (err) return cb(err);
-            that.updateTree(latestCommit, path, blob, function(err, tree) {
+            that.commit(latestCommit, tree, message, function(err, commit) {
               if (err) return cb(err);
-              that.commit(latestCommit, tree, message, function(err, commit) {
-                if (err) return cb(err);
-                that.updateHead(branch, commit, cb);
-              });
+              that.updateHead(branch, commit, cb);
             });
           });
         });
@@ -772,6 +783,6 @@
     // Github = exports;
     module.exports = Github;
   } else {
-    window.Github = Github;
+    this.Github = Github;
   }
 }).call(this);
