@@ -357,18 +357,18 @@
       // Post a new blob object, getting a blob SHA back
       // -------
 
-      this.postBlob = function(content, cb) {
-        if (typeof(content) === "string") {
+      this.postBlob = function(content, cb) {    
+        if (typeof(content) == "string") {
           content = {
             "content": content,
             "encoding": "utf-8"
           };
         } else {
-              content = {
-              "content": btoa(String.fromCharCode.apply(null, new Uint8Array(content))),
-              "encoding": "base64"
-            };
-          }
+          content = {
+            "content": btoa(String.fromCharCode.apply(null, new Uint8Array(content))),
+            "encoding": "base64"
+          };
+        }
 
         _request("POST", repoPath + "/git/blobs", content, function(err, res) {
           if (err) return cb(err);
