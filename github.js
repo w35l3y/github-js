@@ -41,7 +41,7 @@
 
     function _request(method, path, data, cb, raw, sync) {
       function getURL() {
-        var url = (0 < path.indexOf("//")?(options.api_url?options.api_url:API_URL):"") + path;
+        var url = (~path.indexOf("//")?"":(options.api_url?options.api_url:API_URL)) + path;
         return url + ((/\?/).test(url) ? "&" : "?") + (new Date()).getTime();
       }
 
