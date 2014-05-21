@@ -769,6 +769,17 @@
       };
     };
 
+    // Milestones API
+    // =============
+
+    Github.Milestone = function(options) {
+      var path = "/repos/" + options.user + "/" + options.repo + "/milestones";
+
+      this.list = function(options, cb) {
+        _request("GET", path, options, cb);
+      };
+    };
+
     // Top Level API
     // -------
 
@@ -786,6 +797,10 @@
 
     this.getGist = function(id) {
       return new Github.Gist({id: id});
+    };
+
+    this.getMilestones = function(user, repo) {
+      return new Github.Milestone({user: user, repo: repo});
     };
   };
 
