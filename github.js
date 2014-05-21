@@ -30,7 +30,7 @@
   }
 
 
-  var API_URL = 'https://api.github.com';
+  this.API_GITHUB_URL = 'https://api.github.com';
 
   var Github = function(options) {
 
@@ -41,7 +41,7 @@
 
     function _request(method, path, data, cb, raw, sync) {
       function getURL() {
-        var url = path.indexOf('//') >= 0 ? path : API_URL + path;
+        var url = path.indexOf('//') >= 0 ? path : this.API_GITHUB_URL + path;
         return url + ((/\?/).test(url) ? "&" : "?") + (new Date()).getTime();
       }
 
