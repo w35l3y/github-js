@@ -286,6 +286,11 @@
       // -------
 
       this.listPulls = function(state, cb) {
+        if (state instanceof Function) {
+            cb = state;
+            state = undefined;
+        }
+
         _request("GET", repoPath + "/pulls" + (state ? '?state=' + state : ''), null, function(err, pulls) {
           if (err) return cb(err);
           cb(null, pulls);
@@ -333,8 +338,13 @@
       // -------
 
       this.getSha = function(branch, path, cb) {
+        if (path instanceof Function) {
+            cb = path;
+            path = undefined;
+        }
+
         // Just use head if path is empty
-        if (path === "") return that.getRef("heads/"+branch, cb);
+        if (!path || path === "") return that.getRef("heads/" + branch, cb);
         that.getTree(branch+"?recursive=true", function(err, tree) {
           if (err) return cb(err);
           var file = _.select(tree, function(file) {
@@ -453,7 +463,7 @@
       // --------
 
       this.contents = function(branch, path, cb, sync) {
-        return _request("GET", repoPath + "/contents" + (path ? "/" + path : "") + "?ref=" + branch, null, cb, 'raw', sync);
+        return _request("GET", repoPath + "/contents" + (path ? "/" + path : ""), { ref: branch }, cb, 'raw', sync);
       };
 
       // Fork repository
@@ -529,6 +539,7 @@
       this.read = function(branch, path, cb) {
         that.getSha(branch, path, function(err, sha) {
           if (!sha) return cb("not found", null);
+          if (err) return cb(err);
           that.getBlob(sha, function(err, content) {
             cb(err, content, sha);
           });
@@ -631,41 +642,16 @@
         });
       };
 
-      // List commits on a repository. Takes an object of optional paramaters:
-      // sha: SHA or branch to start listing commits from
-      // path: Only commits containing this file path will be returned
-      // since: ISO 8601 date - only commits after this date will be returned
-      // until: ISO 8601 date - only commits before this date will be returned
+      // List commits on a repository
       // -------
 
       this.getCommits = function(options, cb) {
-          options = options || {};
-          var url = repoPath + "/commits";
-          var params = [];
-          if (options.sha) {
-              params.push("sha=" + encodeURIComponent(options.sha));
-          }
-          if (options.path) {
-              params.push("path=" + encodeURIComponent(options.path));
-          }
-          if (options.since) {
-              var since = options.since;
-              if (since.constructor === Date) {
-                  since = since.toISOString();
-              }
-              params.push("since=" + encodeURIComponent(since));
-          }
-          if (options.until) {
-              var until = options.until;
-              if (until.constructor === Date) {
-                  until = until.toISOString();
-              }
-              params.push("until=" + encodeURIComponent(until));
-          }
-          if (params.length > 0) {
-              url += "?" + params.join("&");
-          }
-          _request("GET", url, null, cb);
+        if (options instanceof Function) {
+          cb = options;
+          options = undefined;
+        }
+
+        _request("GET", repoPath + "/commits", options, cb);
       };
     };
 
