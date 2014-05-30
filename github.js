@@ -42,7 +42,14 @@
     function _request(method, path, data, cb, raw, sync) {
       function getURL() {
         var url = (~path.indexOf("//")?"":(options.api_url?options.api_url:API_URL)) + path;
-        return url + ((/\?/).test(url) ? "&" : "?") + (new Date()).getTime();
+		url += ((/\?/).test(url) ? "&" : "?") + (new Date()).getTime();
+		if (typeof(data) == "object" && "GET" == method.toUpperCase()) {
+			for (var k in data) {
+				url += "&" + k + "=" + encodeURIComponent(data[k]);
+			}
+			data = undefined;
+		}
+        return url;
       }
 
       var xhr = new XMLHttpRequest();
@@ -63,11 +70,11 @@
       xhr.setRequestHeader('Accept','application/vnd.github.v3.raw+json');
       xhr.setRequestHeader('Content-Type','application/json;charset=UTF-8');
       if ((options.token) || (options.username && options.password)) {
-           xhr.setRequestHeader('Authorization', options.token
-             ? 'token '+ options.token
-             : 'Basic ' + Base64.encode(options.username + ':' + options.password)
-           );
-         }
+        xhr.setRequestHeader('Authorization', options.token
+          ? 'token '+ options.token
+          : 'Basic ' + Base64.encode(options.username + ':' + options.password)
+        );
+      }
       data ? xhr.send(JSON.stringify(data)) : xhr.send();
       if (sync) return xhr.response;
     }
