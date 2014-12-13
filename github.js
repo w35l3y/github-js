@@ -435,9 +435,6 @@
       this.commit = function(parent, tree, message, cb) {
         var data = {
           "message": message,
-          "author": {
-            "name": options.username
-          },
           "parents": [
           ].concat(parent),
           "tree": tree
