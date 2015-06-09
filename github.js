@@ -409,7 +409,7 @@
               "mode": "100644",
               "type": "blob",
               "sha": blob
-          }),
+          })
         };
         _request("POST", repoPath + "/git/trees", data, function(err, res) {
           if (err) return cb(err);
@@ -633,7 +633,7 @@
               path    : path,
               mode    : "100644",
               type    : "blob",
-              content    : content,
+              content    : content
             }];
           }
           that.updateTree(latestCommit, path, function(err, tree) {
